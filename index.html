@@ -84,7 +84,7 @@
             text-shadow: var(--glow);
         }
 
-        /* --- POWER-UP INDICATORS --- */
+        /* --- INDICATEURS DE POWER-UP --- */
         #powerup-container {
             position: absolute;
             left: 40px;
@@ -100,7 +100,7 @@
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.1);
             padding: 8px;
-            display: none; /* Hidden unless active */
+            display: none; /* Caché sauf si actif */
             animation: slideIn 0.3s ease-out;
         }
 
@@ -228,11 +228,11 @@
     <div id="ui-layer">
         <div style="display: flex; justify-content: space-between;">
             <div class="hud-module">
-                <div class="label">Spectral Signal</div>
+                <div class="label">Signal Spectral</div>
                 <div id="score" class="value">00000000</div>
             </div>
             <div class="hud-module" style="text-align: right;">
-                <div class="label">Hull Status</div>
+                <div class="label">Statut Coque</div>
                 <div id="hull" class="value">100%</div>
             </div>
         </div>
@@ -243,13 +243,13 @@
                 <div class="pu-bar" id="bar-surge" style="background:var(--gold)"></div>
             </div>
             <div id="pu-vector" class="pu-timer">
-                <div class="label" style="color:var(--purple)">Multi-Vector</div>
+                <div class="label" style="color:var(--purple)">Multi-Vecteur</div>
                 <div class="pu-bar" id="bar-vector" style="background:var(--purple)"></div>
             </div>
         </div>
 
         <div style="align-self: center; text-align: center;">
-            <div id="core-label" class="label" style="font-size:11px; margin-bottom:12px;">SYSTEM: VOID</div>
+            <div id="core-label" class="label" style="font-size:11px; margin-bottom:12px;">SYSTÈME: VOID</div>
             <div id="core-status" style="width:50px; height:50px; border-radius:50%; background:var(--void); box-shadow:var(--glow); margin: 0 auto; transition: 0.6s;"></div>
         </div>
     </div>
@@ -258,42 +258,42 @@
         <div class="menu-content">
             <div class="brand-header">
                 <h1 class="main-title" id="terminal-title">VØID<br>BREAKER</h1>
-                <div class="sub-title">Singularity Protocol // 2026</div>
+                <div class="sub-title">Protocole Singularity // 2026</div>
             </div>
             <nav class="nav-links">
-                <button class="nav-item" id="start-btn">ENGAGE PILOT</button>
+                <button class="nav-item" id="start-btn">ENGAGER PILOTE</button>
                 <button class="nav-item" id="scores-btn">DATA VAULT</button>
-                <button class="nav-item" id="settings-btn">SYSTEM SETTINGS</button>
+                <button class="nav-item" id="settings-btn">PARAMÈTRES SYSTÈME</button>
             </nav>
         </div>
     </div>
 
     <div id="leaderboard-overlay" class="full-overlay">
         <div class="board-card">
-            <div class="label" style="font-size: 24px; margin-bottom: 40px; color: #fff;">Active Records</div>
+            <div class="label" style="font-size: 24px; margin-bottom: 40px; color: #fff;">Archives de Combat</div>
             <div id="leaderboard-list"></div>
-            <button class="nav-item close-overlay" style="margin-top: 40px; font-size: 12px; color: var(--void);">DISCONNECT</button>
+            <button class="nav-item close-overlay" style="margin-top: 40px; font-size: 12px; color: var(--void);">DÉCONNEXION</button>
         </div>
     </div>
 
     <div id="settings-overlay" class="full-overlay">
         <div class="board-card">
-            <div class="label" style="font-size: 24px; margin-bottom: 20px; color: #fff;">System Config</div>
+            <div class="label" style="font-size: 24px; margin-bottom: 20px; color: #fff;">Configuration Système</div>
             <div class="settings-grid">
                 <div class="setting-row">
-                    <span class="setting-label">Master Volume</span>
+                    <span class="setting-label">Volume Principal</span>
                     <input type="range" id="volume-slider" min="0" max="100" value="80">
                 </div>
                 <div class="setting-row">
-                    <span class="setting-label">Control Sens.</span>
+                    <span class="setting-label">Sensibilité Pilote</span>
                     <input type="range" id="sens-slider" min="50" max="150" value="100">
                 </div>
             </div>
-            <button class="nav-item close-overlay" style="margin-top: 40px; font-size: 12px; color: var(--void);">SAVE & EXIT</button>
+            <button class="nav-item close-overlay" style="margin-top: 40px; font-size: 12px; color: var(--void);">SAUVEGARDER & QUITTER</button>
         </div>
     </div>
 
-    <div id="warning-msg">CRITICAL BREACH DETECTED</div>
+    <div id="warning-msg">BRÈCHE CRITIQUE DÉTECTÉE</div>
 
     <script type="module">
         import * as THREE from 'three';
@@ -313,10 +313,10 @@
             mouse: new THREE.Vector2(),
             shipPos: new THREE.Vector3(0, -15, 0), shipVel: new THREE.Vector3(),
             records: JSON.parse(localStorage.getItem('void_singularity_records')) || [],
-            powers: { surge: 0, vector: 0 } // Timers in frames
+            powers: { surge: 0, vector: 0 } // Timers en frames
         };
 
-        // --- ENGINE ---
+        // --- MOTEUR ---
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x000008, 0.007);
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
@@ -330,7 +330,7 @@
         const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.4, 0.85);
         composer.addPass(bloom);
 
-        // --- OBJECTS ---
+        // --- OBJETS ---
         const starGeo = new THREE.BufferGeometry();
         const starPos = [];
         for (let i = 0; i < 4000; i++) starPos.push((Math.random()-0.5)*1200, (Math.random()-0.5)*1000, (Math.random()-1.0)*1000);
@@ -439,7 +439,7 @@
             o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
         }
 
-        // --- CORE ---
+        // --- CŒUR ---
         let ship;
         const enemyGeo = new THREE.IcosahedronGeometry(1.5, 0);
         const puGeo = new THREE.OctahedronGeometry(1);
@@ -461,7 +461,7 @@
             ship.update(); if (!STATE.active) return;
             STATE.frame++; CONFIG.difficulty = 1 + (STATE.score / 50000);
 
-            // Power-up HUD management
+            // Gestion HUD Power-up
             ['surge', 'vector'].forEach(p => {
                 const el = document.getElementById(`pu-${p}`);
                 if(STATE.powers[p] > 0) {
@@ -520,8 +520,11 @@
         }
 
         function gameOver() {
-            STATE.active = false; saveRecord(STATE.score);
-            document.getElementById('terminal-title').innerHTML = "SIGNAL<br>LOST";
+            STATE.active = false;
+            saveRecord(STATE.score); // Sauvegarde immédiate
+            renderRecords(); // Mise à jour immédiate de l'affichage du Data Vault
+            
+            document.getElementById('terminal-title').innerHTML = "SIGNAL<br>PERDU";
             setTimeout(() => { 
                 document.getElementById('ui-layer').style.display = 'none';
                 document.getElementById('main-menu').style.display = 'flex';
@@ -532,13 +535,24 @@
         function saveRecord(s) {
             const date = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
             STATE.records.push({ score: Math.floor(s), date });
-            STATE.records.sort((a,b) => b.score - a.score); STATE.records = STATE.records.slice(0, 5);
+            STATE.records.sort((a,b) => b.score - a.score);
+            STATE.records = STATE.records.slice(0, 5);
             localStorage.setItem('void_singularity_records', JSON.stringify(STATE.records));
         }
 
         function renderRecords() {
             const list = document.getElementById('leaderboard-list');
-            list.innerHTML = STATE.records.map((r, i) => `<div class="score-entry ${i===0?'top':''}"><span>#0${i+1}</span><span>${r.score.toString().padStart(8,'0')}</span><span style="font-size:10px; opacity:0.5;">${r.date}</span></div>`).join('');
+            if (STATE.records.length === 0) {
+                list.innerHTML = `<div class="label" style="opacity:0.3; text-align:center;">AUCUNE DONNÉE TROUVÉE</div>`;
+                return;
+            }
+            list.innerHTML = STATE.records.map((r, i) => `
+                <div class="score-entry ${i === 0 ? 'top' : ''}">
+                    <span>#0${i+1}</span>
+                    <span>${r.score.toString().padStart(8, '0')}</span>
+                    <span style="font-size:10px; opacity:0.5; text-align:right;">${r.date}</span>
+                </div>
+            `).join('');
         }
 
         function initSettingsUI() {
@@ -556,7 +570,7 @@
             if(!STATE.active) return; STATE.polarity = 1 - STATE.polarity;
             const isV = STATE.polarity === 0; const c = isV ? 'var(--void)' : 'var(--matter)';
             document.getElementById('core-status').style.background = c;
-            document.getElementById('core-label').innerText = `SYSTEM: ${isV?'VOID':'MATTER'}`;
+            document.getElementById('core-label').innerText = `SYSTÈME: ${isV?'VOID':'MATTER'}`;
             document.getElementById('core-label').style.color = c;
             playSfx(250, 0.2, 'triangle', 0.2);
         }
@@ -568,7 +582,10 @@
             updateUI();
         });
 
-        document.getElementById('scores-btn').addEventListener('click', () => document.getElementById('leaderboard-overlay').style.display='flex');
+        document.getElementById('scores-btn').addEventListener('click', () => {
+            renderRecords(); // Assure que les scores sont à jour avant l'affichage
+            document.getElementById('leaderboard-overlay').style.display='flex';
+        });
         document.getElementById('settings-btn').addEventListener('click', () => document.getElementById('settings-overlay').style.display='flex');
         document.querySelectorAll('.close-overlay').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.full-overlay').forEach(o=>o.style.display='none')));
 
