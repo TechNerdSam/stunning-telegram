@@ -2,242 +2,154 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VØID // BREAKER 2026 : SINGULARITY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VØID // BREAKER : ETERNITY [AAA]</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Michroma&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <!-- Typographie Cinématique -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
+        /* --- CORE DESIGN SYSTEM 2026 --- */
         :root {
-            --void: #00f3ff;
-            --matter: #ff0055;
-            --gold: #ffd700;
-            --purple: #bf00ff;
-            --bg-deep: #000008;
-            --ui-border: rgba(0, 243, 255, 0.4);
-            --glass: rgba(0, 8, 15, 0.85);
-            --glow: 0 0 15px rgba(0, 243, 255, 0.5);
+            --void: #00f3ff;   /* Cyan Électrique */
+            --matter: #ff0055; /* Magenta Plasma */
+            --gold: #ffcc00;   /* Or Solaire */
+            --dark: #020205;   /* Noir Profond */
+            --ui-glass: rgba(10, 20, 40, 0.6);
+            --ui-border: rgba(255, 255, 255, 0.1);
+            --scanline: rgba(0, 0, 0, 0.5);
         }
 
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background-color: var(--bg-deep);
-            overflow: hidden;
-            font-family: 'Rajdhani', sans-serif;
-            cursor: none;
-            user-select: none;
+        body {
+            margin: 0; background: var(--dark); overflow: hidden;
+            font-family: 'Rajdhani', sans-serif; color: white;
+            cursor: none; user-select: none;
         }
 
-        #canvas-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1;
-        }
+        #canvas-container { position: absolute; inset: 0; z-index: 1; }
 
-        .cinematic-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+        /* --- FX OVERLAYS --- */
+        .vignette {
+            position: fixed; inset: 0; pointer-events: none; z-index: 5;
+            background: radial-gradient(circle, transparent 40%, #000 120%);
+        }
+        .scanlines {
+            position: fixed; inset: 0; pointer-events: none; z-index: 6;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
             pointer-events: none;
-            z-index: 5;
-            background: 
-                radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.7) 100%),
-                repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 2px);
-            mix-blend-mode: multiply;
+        }
+        .damage-overlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 7;
+            box-shadow: inset 0 0 0 0 var(--matter);
+            transition: box-shadow 0.1s ease-out;
+            mix-blend-mode: overlay;
         }
 
-        /* --- HUD EN JEU --- */
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10;
-            pointer-events: none;
-            padding: 40px;
-            box-sizing: border-box;
-            display: none; 
-            flex-direction: column;
-            justify-content: space-between;
+        /* --- CURSOR --- */
+        #cursor {
+            position: fixed; width: 30px; height: 30px;
+            border: 2px solid rgba(255,255,255,0.8); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 9999;
+            mix-blend-mode: difference; transition: transform 0.1s;
         }
+        #cursor::after {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 4px; height: 4px; background: var(--void); border-radius: 50%;
+        }
+
+        /* --- HUD (HEADS UP DISPLAY) --- */
+        #hud {
+            position: absolute; inset: 0; z-index: 10;
+            padding: 40px; display: flex; flex-direction: column; justify-content: space-between;
+            pointer-events: none; transition: opacity 0.5s;
+        }
+        .hidden { opacity: 0; pointer-events: none; }
 
         .hud-module {
-            background: var(--glass);
+            background: var(--ui-glass);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--ui-border);
             padding: 15px 30px;
-            backdrop-filter: blur(25px);
+            transform: skewX(-10deg);
             position: relative;
-            clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
-
-        .label {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 8px;
-            letter-spacing: 4px;
-            color: var(--void);
-            margin-bottom: 5px;
-            text-transform: uppercase;
+        .hud-module::before {
+            content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%;
+            background: var(--void); box-shadow: 0 0 10px var(--void);
         }
-
-        .value {
-            font-family: 'Michroma', sans-serif;
-            font-size: 22px;
-            color: #fff;
-            text-shadow: var(--glow);
-        }
-
-        /* --- INDICATEURS DE POWER-UP --- */
-        #powerup-container {
-            position: absolute;
-            left: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .pu-timer {
-            width: 150px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 8px;
-            display: none; 
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .pu-bar {
-            height: 4px;
-            background: var(--void);
-            width: 100%;
-            transform-origin: left;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        .hud-module.right::before { left: auto; right: 0; background: var(--matter); box-shadow: 0 0 10px var(--matter); }
+        
+        .label { font-family: 'Share Tech Mono'; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.6); margin-bottom: 5px; transform: skewX(10deg); }
+        .value { font-family: 'Orbitron'; font-size: 32px; font-weight: 700; transform: skewX(10deg); text-shadow: 0 0 15px currentColor; }
 
         /* --- MENUS --- */
-        #main-menu {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 100;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            padding-left: 10%;
-            background: radial-gradient(circle at 20% 50%, rgba(0,10,20,0.6) 0%, transparent 70%);
-            transition: opacity 0.8s, transform 1s ease-in-out;
+        .menu-layer {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0, 3, 10, 0.85); backdrop-filter: blur(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0; pointer-events: none; clip-path: circle(0% at 50% 50%);
         }
+        .menu-layer.active { opacity: 1; pointer-events: auto; clip-path: circle(150% at 50% 50%); }
 
-        .menu-content {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            pointer-events: auto;
-        }
-
-        .brand-header {
-            border-left: 4px solid var(--void);
-            padding-left: 30px;
-        }
-
-        .main-title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: clamp(40px, 8vw, 90px);
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: -6px;
-            line-height: 0.8;
-            margin: 0;
-            text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
-        }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .nav-item {
-            background: transparent;
-            border: none;
-            color: rgba(255,255,255,0.4);
-            font-family: 'Syncopate';
-            font-size: 16px;
-            letter-spacing: 8px;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.4s;
+        .title-container { text-align: center; margin-bottom: 60px; position: relative; }
+        .glitch-title {
+            font-family: 'Orbitron'; font-weight: 900; font-size: clamp(60px, 10vw, 120px);
+            line-height: 0.8; letter-spacing: -5px;
+            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
             position: relative;
-            padding: 10px 0;
-            outline: none;
+        }
+        .glitch-title::after {
+            content: 'VØID BREAKER'; position: absolute; left: 0; top: 0;
+            width: 100%; height: 100%; opacity: 0.5;
+            color: var(--void); z-index: -1;
+            transform: translate(4px, 4px); mix-blend-mode: screen;
+            animation: glitch-anim 2s infinite;
         }
 
-        .nav-item:hover { color: #fff; padding-left: 30px; text-shadow: var(--glow); }
+        .btn-group { display: flex; flex-direction: column; gap: 20px; width: 300px; }
+        .cyber-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            padding: 20px; color: white; font-family: 'Rajdhani'; font-weight: 700; font-size: 18px;
+            letter-spacing: 4px; text-transform: uppercase; cursor: none;
+            position: relative; overflow: hidden; transition: 0.3s;
+        }
+        .cyber-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+        .cyber-btn:hover { border-color: var(--void); text-shadow: 0 0 10px var(--void); background: rgba(0, 243, 255, 0.05); }
+        .cyber-btn:hover::before { left: 100%; }
 
-        .full-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(40px);
-            z-index: 200;
-            display: none;
-            justify-content: center;
-            align-items: center;
+        @keyframes glitch-anim {
+            0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+            40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
+            60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(10% 0 60% 0); transform: translate(-1px, 1px); }
+            100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
         }
 
-        .board-card {
-            width: 90%;
-            max-width: 600px;
-            background: var(--glass);
-            border: 1px solid var(--ui-border);
-            padding: 40px;
-            position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        /* --- NOTIFICATIONS --- */
+        #notification-area {
+            position: absolute; top: 20%; width: 100%; text-align: center;
+            pointer-events: none; z-index: 20;
         }
-
-        .settings-grid { display: flex; flex-direction: column; gap: 30px; margin-top: 30px; }
-        .setting-row { display: flex; justify-content: space-between; align-items: center; }
-
-        .setting-label {
-            font-family: 'Rajdhani';
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #fff;
-            font-size: 18px;
+        .notify-msg {
+            font-family: 'Orbitron'; font-size: 40px; font-weight: 800; letter-spacing: 5px;
+            text-shadow: 0 0 20px currentColor; opacity: 0; transform: scale(1.5);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .notify-msg.show { opacity: 1; transform: scale(1); }
 
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 200px;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            outline: none;
-            border-radius: 2px;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px; height: 15px;
-            background: var(--void);
-            cursor: pointer;
-            box-shadow: var(--glow);
-            border-radius: 50%;
-        }
-
-        #warning-msg {
-            position: absolute;
-            top: 35%; width: 100%;
-            text-align: center;
-            font-family: 'Syncopate';
-            font-size: 32px;
-            color: var(--matter);
-            opacity: 0;
-            text-shadow: 0 0 20px var(--matter);
-            pointer-events: none;
-        }
     </style>
 
+    <!-- THREE.JS IMPORT MAP -->
     <script type="importmap">
         {
             "imports": {
@@ -249,350 +161,566 @@
 </head>
 <body>
 
+    <!-- VISUAL LAYERS -->
     <div id="canvas-container"></div>
-    <div class="cinematic-overlay"></div>
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+    <div class="damage-overlay" id="damage-fx"></div>
+    <div id="cursor"></div>
 
-    <div id="ui-layer">
-        <div style="display: flex; justify-content: space-between;">
+    <!-- NOTIFICATIONS -->
+    <div id="notification-area">
+        <div id="notify-text" class="notify-msg">SYSTEM READY</div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div class="hud-module">
-                <div class="label">Signal Spectral</div>
-                <div id="score" class="value">00000000</div>
+                <div class="label">SIGNAL SPECTRAL</div>
+                <div id="score" class="value" style="color:var(--void)">000000</div>
             </div>
-            <div class="hud-module" style="text-align: right;">
-                <div class="label">Statut Coque</div>
-                <div id="hull" class="value">100%</div>
-            </div>
-        </div>
-
-        <div id="powerup-container">
-            <div id="pu-surge" class="pu-timer">
-                <div class="label" style="color:var(--gold)">Chrono-Surge</div>
-                <div class="pu-bar" id="bar-surge" style="background:var(--gold)"></div>
-            </div>
-            <div id="pu-vector" class="pu-timer">
-                <div class="label" style="color:var(--purple)">Multi-Vecteur</div>
-                <div class="pu-bar" id="bar-vector" style="background:var(--purple)"></div>
+            <div class="hud-module right">
+                <div class="label">INTÉGRITÉ COQUE</div>
+                <div id="hp" class="value" style="color:var(--matter)">100%</div>
             </div>
         </div>
-
-        <div style="align-self: center; text-align: center;">
-            <div id="core-label" class="label" style="font-size:11px; margin-bottom:12px;">SYSTÈME: VOID</div>
-            <div id="core-status" style="width:50px; height:50px; border-radius:50%; background:var(--void); box-shadow:var(--glow); margin: 0 auto; transition: 0.6s;"></div>
+        
+        <!-- Polarité Indicator (Centre Bas) -->
+        <div style="align-self: center; text-align: center; transform: translateY(-40px);">
+            <div id="polarity-icon" style="
+                width: 60px; height: 60px; border: 2px solid var(--void); 
+                border-radius: 50%; margin: 0 auto 10px; 
+                box-shadow: 0 0 20px var(--void); background: rgba(0, 243, 255, 0.1);
+                transition: 0.3s; position: relative;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 20px; height: 20px; background: white; border-radius: 50%;"></div>
+            </div>
+            <div id="polarity-text" style="font-family: 'Share Tech Mono'; letter-spacing: 4px; color: var(--void); font-size: 12px;">SYSTEM: VOID</div>
         </div>
     </div>
 
-    <div id="main-menu">
-        <div class="menu-content">
-            <div class="brand-header">
-                <h1 class="main-title" id="terminal-title">VØID<br>BREAKER</h1>
-                <div class="sub-title">Protocole Singularity // 2026</div>
-            </div>
-            <nav class="nav-links">
-                <button class="nav-item" id="start-btn">ENGAGER PILOTE</button>
-                <button class="nav-item" id="settings-btn">PARAMÈTRES SYSTÈME</button>
-            </nav>
+    <!-- MAIN MENU -->
+    <div id="main-menu" class="menu-layer active">
+        <div class="title-container">
+            <div style="font-family: 'Share Tech Mono'; letter-spacing: 5px; color: var(--matter); margin-bottom: 10px;">PROJECT: ETERNITY</div>
+            <div class="glitch-title">VØID</div>
+            <div class="glitch-title" style="font-size: clamp(30px, 5vw, 60px); color: white; -webkit-text-fill-color: white;">BREAKER</div>
+        </div>
+        <div class="btn-group">
+            <button class="cyber-btn" onclick="GAME.start()">ENGAGER SYSTÈME</button>
+            <button class="cyber-btn" onclick="alert('Contrôles: SOURIS pour bouger/tirer. CLIC DROIT ou ESPACE pour changer de couleur.')">DONNÉES TACTIQUES</button>
         </div>
     </div>
 
-    <!-- PARAMÈTRES SYSTÈME -->
-    <div id="settings-overlay" class="full-overlay">
-        <div class="board-card">
-            <div class="label" style="font-size: 24px; margin-bottom: 20px; color: #fff;">Configuration Système</div>
-            <div class="settings-grid">
-                <div class="setting-row">
-                    <span class="setting-label">Volume Principal</span>
-                    <input type="range" id="volume-slider" min="0" max="100" value="80">
-                </div>
-                <div class="setting-row">
-                    <span class="setting-label">Sensibilité Pilote</span>
-                    <input type="range" id="sens-slider" min="50" max="150" value="100">
-                </div>
-            </div>
-            <button class="nav-item close-overlay" style="margin-top: 40px; font-size: 12px; color: var(--void);">SAUVEGARDER & QUITTER</button>
+    <!-- PAUSE -->
+    <div id="pause-menu" class="menu-layer">
+        <div class="glitch-title" style="font-size: 80px;">PAUSE</div>
+        <div class="btn-group">
+            <button class="cyber-btn" onclick="GAME.togglePause()">REPRENDRE</button>
+            <button class="cyber-btn" onclick="GAME.quit()">ABANDONNER</button>
         </div>
     </div>
 
-    <div id="warning-msg">BRÈCHE CRITIQUE DÉTECTÉE</div>
+    <!-- GAME OVER -->
+    <div id="game-over" class="menu-layer">
+        <div class="glitch-title" style="font-size: 80px; color: var(--matter); -webkit-text-fill-color: var(--matter);">SIGNAL PERDU</div>
+        <div style="font-family: 'Orbitron'; font-size: 40px; margin: 20px 0; text-shadow: 0 0 20px white;">SCORE: <span id="final-score">0</span></div>
+        <div class="btn-group">
+            <button class="cyber-btn" onclick="GAME.start()">RÉINITIALISER</button>
+            <button class="cyber-btn" onclick="GAME.quit()">MENU PRINCIPAL</button>
+        </div>
+    </div>
 
     <script type="module">
         import * as THREE from 'three';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-        const CONFIG = {
-            colors: { void: 0x00f3ff, matter: 0xff0055, gold: 0xffd700, purple: 0xbf00ff },
-            difficulty: 1.0,
-            settings: JSON.parse(localStorage.getItem('void_breaker_settings')) || { volume: 80, sensitivity: 100 }
+        // --- CUSTOM SHADER: DIGITAL GLITCH (RGB SHIFT + NOISE) ---
+        const GlitchShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "amount": { value: 0.0 },
+                "seed": { value: 0.0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float amount;
+                uniform float seed;
+                varying vec2 vUv;
+
+                float rand(vec2 co){
+                    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+                }
+
+                void main() {
+                    vec2 p = vUv;
+                    float xs = floor(gl_FragCoord.x / 0.5);
+                    float ys = floor(gl_FragCoord.y / 0.5);
+                    
+                    // Glitch displacement
+                    if(amount > 0.0) {
+                        float disp = (rand(vec2(floor(p.y * 20.0) + seed, seed)) - 0.5) * amount * 0.2;
+                        p.x += disp;
+                    }
+
+                    // RGB Shift
+                    float shift = amount * 0.02;
+                    vec4 cr = texture2D(tDiffuse, p + vec2(shift, 0.0));
+                    vec4 cg = texture2D(tDiffuse, p);
+                    vec4 cb = texture2D(tDiffuse, p - vec2(shift, 0.0));
+
+                    gl_FragColor = vec4(cr.r, cg.g, cb.b, 1.0);
+                }
+            `
         };
 
+        // --- CONSTANTS ---
+        const COLORS = { 
+            void: 0x00f3ff, 
+            matter: 0xff0055, 
+            gold: 0xffcc00,
+            white: 0xffffff,
+            darkMetal: 0x111111 
+        };
+        const LIMITS = { x: 35, y: 60 };
+
+        // --- GAME STATE ---
         const STATE = {
-            active: false,
-            score: 0, hp: 100, polarity: 0, frame: 0,
-            mouse: new THREE.Vector2(),
-            shipPos: new THREE.Vector3(0, -15, 0), shipVel: new THREE.Vector3(),
-            records: JSON.parse(localStorage.getItem('void_singularity_records')) || [],
-            powers: { surge: 0, vector: 0 } 
+            active: false, paused: false, gameOver: false,
+            score: 0, hp: 100, polarity: 0, // 0 = Void, 1 = Matter
+            frame: 0, 
+            shake: 0, glitch: 0
         };
 
-        // --- MOTEUR RENDU ---
+        // --- THREE.JS SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000008, 0.007);
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        scene.fog = new THREE.FogExp2(0x020205, 0.008); // Deep fog for depth
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+        camera.position.set(0, -10, 35);
+        camera.rotation.x = 0.3;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Perf balance
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
+        // --- POST PROCESSING ---
         const composer = new EffectComposer(renderer);
-        composer.addPass(new RenderPass(scene, camera));
-        const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.4, 0.85);
-        composer.addPass(bloom);
+        const renderPass = new RenderPass(scene, camera);
+        composer.addPass(renderPass);
 
-        // --- DÉCOR ---
+        // 1. Unreal Bloom (Neon Glow)
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.5, 0.85);
+        composer.addPass(bloomPass);
+
+        // 2. Custom Glitch Pass
+        const glitchPass = new ShaderPass(GlitchShader);
+        composer.addPass(glitchPass);
+
+        // --- LIGHTING ---
+        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambient);
+        const sun = new THREE.DirectionalLight(0xffffff, 2.0);
+        sun.position.set(20, 50, 20);
+        scene.add(sun);
+        const backLight = new THREE.DirectionalLight(COLORS.void, 1.0);
+        backLight.position.set(-20, 10, -20);
+        scene.add(backLight);
+
+        // --- ASSETS GENERATION ---
+        
+        // 1. Warp Grid (Moving Floor)
+        const gridHelper = new THREE.GridHelper(400, 100, COLORS.void, 0x111111);
+        gridHelper.position.y = -50;
+        gridHelper.position.z = -50;
+        scene.add(gridHelper);
+
+        // 2. Starfield
         const starGeo = new THREE.BufferGeometry();
-        const starPos = [];
-        for (let i = 0; i < 4000; i++) starPos.push((Math.random()-0.5)*1200, (Math.random()-0.5)*1000, (Math.random()-1.0)*1000);
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ size: 1.5, color: 0xffffff, transparent: true, opacity: 0.5 }));
+        const starCount = 4000;
+        const starPos = new Float32Array(starCount * 3);
+        for(let i=0; i<starCount*3; i++) starPos[i] = (Math.random()-0.5)*800;
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.7, transparent: true, opacity: 0.8}));
         scene.add(stars);
 
-        class Ship {
-            constructor() {
-                this.group = new THREE.Group();
-                const geo = new THREE.OctahedronGeometry(1.6, 1); geo.scale(1, 2.2, 0.5);
-                const mat = new THREE.MeshStandardMaterial({ color: 0x010101, metalness: 1, roughness: 0.05, emissive: CONFIG.colors.void, emissiveIntensity: 2 });
-                this.mesh = new THREE.Mesh(geo, mat); this.mesh.rotation.x = Math.PI/2;
-                this.light = new THREE.PointLight(CONFIG.colors.void, 3, 25);
-                this.group.add(this.mesh, this.light); scene.add(this.group);
+        // --- ENTITIES ---
+
+        // PLAYER SHIP (High Poly Procedural)
+        const ship = new THREE.Group();
+        
+        // Fuselage (Blanc céramique)
+        const hullMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.2, metalness: 0.5 });
+        const hull = new THREE.Mesh(new THREE.ConeGeometry(1.2, 6, 6), hullMat);
+        hull.rotation.x = -Math.PI/2;
+        hull.rotation.y = Math.PI/6; // Align hex
+        
+        // Cockpit (Verre noir)
+        const cockpit = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.5), new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0, metalness: 1 }));
+        cockpit.position.set(0, 0.5, 0.5);
+        cockpit.rotation.x = -0.5;
+
+        // Ailes (Bleu nuit technologique)
+        const wingGeo = new THREE.BufferGeometry();
+        const wingVerts = new Float32Array([
+            0,0,0,  4,-2,0,  0,-5,0, // Aile D
+            0,0,0, -4,-2,0,  0,-5,0  // Aile G
+        ]);
+        wingGeo.setAttribute('position', new THREE.BufferAttribute(wingVerts, 3));
+        wingGeo.computeVertexNormals();
+        const wingMat = new THREE.MeshStandardMaterial({ color: 0x0a1020, roughness: 0.4, metalness: 0.8, side: THREE.DoubleSide });
+        const wings = new THREE.Mesh(wingGeo, wingMat);
+        wings.position.y = -0.5;
+
+        // Moteurs (Chrome & Glow)
+        const engGeo = new THREE.CylinderGeometry(0.5, 0.3, 2, 8);
+        const engMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 1.0, roughness: 0.2 });
+        const engL = new THREE.Mesh(engGeo, engMat); engL.position.set(1.5, -2, 0); engL.rotation.x = -Math.PI/2;
+        const engR = new THREE.Mesh(engGeo, engMat); engR.position.set(-1.5, -2, 0); engR.rotation.x = -Math.PI/2;
+        
+        // Lumières Moteurs
+        const engineLight = new THREE.PointLight(COLORS.void, 3, 15);
+        engineLight.position.set(0, -3, 1);
+        
+        ship.add(hull, cockpit, wings, engL, engR, engineLight);
+        scene.add(ship);
+        ship.position.y = -20;
+
+        // POOLS
+        const bullets = [];
+        const enemies = [];
+        const enemyBullets = [];
+        const particles = [];
+
+        // --- LOGIC FUNCTIONS ---
+
+        function createExplosion(pos, color, scale=1) {
+            for(let i=0; i<8 * scale; i++) {
+                const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const mat = new THREE.MeshBasicMaterial({ color: color });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.copy(pos);
+                
+                // Random velocity
+                const vel = new THREE.Vector3((Math.random()-0.5), (Math.random()-0.5), (Math.random()-0.5)).normalize().multiplyScalar(Math.random()*2);
+                
+                scene.add(mesh);
+                particles.push({ mesh, vel, life: 1.0 });
             }
-            update() {
-                if (STATE.active) {
-                    const sens = CONFIG.settings.sensitivity / 100;
-                    STATE.shipVel.x += (STATE.mouse.x * 50 * sens - STATE.shipPos.x) * 0.08;
-                    STATE.shipVel.y += (STATE.mouse.y * 35 * sens - STATE.shipPos.y) * 0.08;
-                    STATE.shipVel.multiplyScalar(0.82); STATE.shipPos.add(STATE.shipVel);
-                    this.group.position.copy(STATE.shipPos); this.group.rotation.z = -STATE.shipVel.x * 0.05;
-                } else {
-                    const t = Date.now() * 0.001; this.group.position.y = Math.sin(t) * 2 - 5; this.group.rotation.y += 0.005;
-                    camera.position.x = Math.cos(t * 0.2) * 20; camera.position.z = 40 + Math.sin(t * 0.2) * 10; camera.lookAt(0, -5, 0);
-                }
-                const col = STATE.polarity === 0 ? CONFIG.colors.void : CONFIG.colors.matter;
-                this.mesh.material.emissive.setHex(col); this.light.color.setHex(col);
+        }
+
+        function spawnEnemy() {
+            const grp = new THREE.Group();
+            
+            // Core Geometry (Rotating fractal-like)
+            const type = Math.random() > 0.5 ? 0 : 1;
+            const col = type === 0 ? COLORS.void : COLORS.matter;
+            
+            const coreGeo = new THREE.IcosahedronGeometry(1.5, 0);
+            const coreMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: col, emissiveIntensity: 2, roughness: 0.1 });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            
+            // Orbiting Rings
+            const ringGeo = new THREE.TorusGeometry(2.5, 0.1, 4, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x555555, wireframe: true });
+            const ring1 = new THREE.Mesh(ringGeo, ringMat);
+            const ring2 = new THREE.Mesh(ringGeo, ringMat); ring2.rotation.x = Math.PI/2;
+            
+            grp.add(core, ring1, ring2);
+            grp.position.set((Math.random()-0.5)*60, 70, 0);
+            
+            grp.userData = { hp: 30, type: type, active: true };
+            scene.add(grp);
+            enemies.push(grp);
+        }
+
+        function notify(text, color) {
+            const el = document.getElementById('notify-text');
+            el.innerText = text;
+            el.style.color = color;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 1500);
+        }
+
+        // --- GLOBAL GAME CONTROLLER ---
+        window.GAME = {
+            start() {
+                STATE.active = true; STATE.paused = false; STATE.gameOver = false;
+                STATE.score = 0; STATE.hp = 100;
+                
+                // Reset Arrays
+                [bullets, enemies, enemyBullets, particles].forEach(arr => {
+                    arr.forEach(obj => { if(obj.mesh) scene.remove(obj.mesh); else scene.remove(obj); });
+                    arr.length = 0;
+                });
+
+                ship.position.set(0, -20, 0);
+                
+                // UI
+                document.getElementById('main-menu').classList.remove('active');
+                document.getElementById('game-over').classList.remove('active');
+                document.getElementById('hud').classList.remove('hidden');
+                
+                this.updatePolarity(0); // Force Void
+                notify("MISSION START", "white");
+            },
+
+            togglePause() {
+                STATE.paused = !STATE.paused;
+                const menu = document.getElementById('pause-menu');
+                if(STATE.paused) menu.classList.add('active');
+                else menu.classList.remove('active');
+            },
+
+            quit() {
+                STATE.active = false;
+                document.getElementById('hud').classList.add('hidden');
+                document.getElementById('pause-menu').classList.remove('active');
+                document.getElementById('game-over').classList.remove('active');
+                document.getElementById('main-menu').classList.add('active');
+            },
+
+            gameOver() {
+                STATE.gameOver = true; STATE.active = false;
+                document.getElementById('hud').classList.add('hidden');
+                document.getElementById('game-over').classList.add('active');
+                document.getElementById('final-score').innerText = STATE.score;
+            },
+
+            fire() {
+                if(!STATE.active || STATE.paused) return;
+                
+                const col = STATE.polarity === 0 ? COLORS.void : COLORS.matter;
+                const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 2, 4), new THREE.MeshBasicMaterial({ color: col }));
+                b.rotation.x = Math.PI/2; // Orient forward
+                b.position.copy(ship.position); b.position.y += 3;
+                
+                // Add Light to bullet for visuals
+                const light = new THREE.PointLight(col, 1, 8);
+                b.add(light);
+                
+                b.userData = { type: STATE.polarity, active: true };
+                scene.add(b);
+                bullets.push(b);
+                
+                // Recul
+                STATE.shake += 0.2;
+            },
+
+            updatePolarity() {
+                STATE.polarity = 1 - STATE.polarity;
+                const isVoid = STATE.polarity === 0;
+                const col = isVoid ? COLORS.void : COLORS.matter;
+                
+                // Visuals
+                engineLight.color.setHex(col);
+                backLight.color.setHex(col);
+                
+                // HUD
+                const icon = document.getElementById('polarity-icon');
+                const text = document.getElementById('polarity-text');
+                icon.style.borderColor = isVoid ? 'var(--void)' : 'var(--matter)';
+                icon.style.boxShadow = `0 0 20px ${isVoid ? 'var(--void)' : 'var(--matter)'}`;
+                icon.style.background = isVoid ? 'rgba(0, 243, 255, 0.1)' : 'rgba(255, 0, 85, 0.1)';
+                text.innerText = `SYSTEM: ${isVoid ? 'VOID' : 'MATTER'}`;
+                text.style.color = isVoid ? 'var(--void)' : 'var(--matter)';
             }
-            shoot() {
-                const fireRate = STATE.powers.surge > 0 ? 3 : 6;
-                if (STATE.frame % fireRate === 0) {
-                    if (STATE.powers.vector > 0) {
-                        for(let i=-2; i<=2; i++) spawnBullet(STATE.shipPos.x, STATE.shipPos.y, i*0.4, 2.5, 'player', STATE.polarity);
-                    } else {
-                        spawnBullet(STATE.shipPos.x - 1.5, STATE.shipPos.y, 0, 2.5, 'player', STATE.polarity);
-                        spawnBullet(STATE.shipPos.x + 1.5, STATE.shipPos.y, 0, 2.5, 'player', STATE.polarity);
-                    }
-                    playSfx(STATE.polarity === 0 ? 900 : 450, 0.1, 'sine', 0.05);
-                }
-            }
-        }
+        };
 
-        class Enemy {
-            constructor(mesh) { this.mesh = mesh; this.active = false; this.hp = 0; this.type = 0; }
-            spawn(x, y, type) {
-                this.active = true; this.mesh.visible = true; this.x = x; this.y = y; this.type = type;
-                this.hp = 20 + (STATE.score / 500);
-                this.mesh.material.emissive.setHex(type === 0 ? CONFIG.colors.void : CONFIG.colors.matter);
-            }
-            update() {
-                this.y -= 0.22 * CONFIG.difficulty; this.mesh.position.set(this.x, this.y, 0); this.mesh.rotation.z += 0.04;
-                if (this.y < -55) this.despawn();
-            }
-            despawn() { this.active = false; this.mesh.visible = false; }
-        }
-
-        class PowerUp {
-            constructor(mesh) { this.mesh = mesh; this.active = false; this.type = ''; }
-            spawn(x, y, type) {
-                this.active = true; this.mesh.visible = true; this.x = x; this.y = y; this.type = type;
-                const col = type === 'surge' ? CONFIG.colors.gold : (type === 'vector' ? CONFIG.colors.purple : CONFIG.colors.void);
-                this.mesh.material.color.setHex(col);
-                this.mesh.material.emissive.setHex(col);
-            }
-            update() {
-                this.y -= 0.15; this.mesh.position.set(this.x, this.y, 0); this.mesh.rotation.y += 0.05;
-                if (this.y < -55) this.despawn();
-                if (Math.abs(this.x - STATE.shipPos.x) < 3 && Math.abs(this.y - STATE.shipPos.y) < 3) {
-                    this.collect();
-                }
-            }
-            collect() {
-                if(this.type === 'surge') STATE.powers.surge = 600;
-                else if(this.type === 'vector') STATE.powers.vector = 600;
-                else if(this.type === 'aegis') { STATE.hp = Math.min(100, STATE.hp + 30); updateUI(); }
-                playSfx(1500, 0.4, 'triangle', 0.1);
-                this.despawn();
-            }
-            despawn() { this.active = false; this.mesh.visible = false; }
-        }
-
-        const POOL = { bullets: [], enemies: [], powers: [] };
-
-        function spawnBullet(x, y, vx, vy, owner, type) {
-            let b = POOL.bullets.find(i => !i.active);
-            if (!b) {
-                const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.8, 6), new THREE.MeshBasicMaterial());
-                mesh.rotation.x = Math.PI/2; scene.add(mesh);
-                b = { active: false, mesh }; POOL.bullets.push(b);
-            }
-            b.active = true; b.mesh.visible = true; b.x = x; b.y = y; b.vx = vx; b.vy = vy; b.owner = owner; b.type = type;
-            b.mesh.material.color.setHex(type === 0 ? CONFIG.colors.void : CONFIG.colors.matter);
-        }
-
-        // --- AUDIO ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSfx(f, d, t = 'sine', vol = 0.1) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const masterVol = CONFIG.settings.volume / 100;
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-            o.frequency.exponentialRampToValueAtTime(f/10, audioCtx.currentTime + d);
-            g.gain.setValueAtTime(vol * masterVol, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
-            o.connect(g); g.connect(audioCtx.destination);
-            o.start(); o.stop(audioCtx.currentTime + d);
-        }
-
-        // --- CŒUR ---
-        let ship;
-        const enemyGeo = new THREE.IcosahedronGeometry(1.5, 0);
-        const puGeo = new THREE.OctahedronGeometry(1);
-
-        function init() {
-            ship = new Ship();
-            for (let i = 0; i < 60; i++) {
-                const m = new THREE.Mesh(enemyGeo, new THREE.MeshStandardMaterial({ metalness: 1, roughness: 0.1, emissiveIntensity: 4 }));
-                m.visible = false; scene.add(m); POOL.enemies.push(new Enemy(m));
-            }
-            for (let i = 0; i < 5; i++) {
-                const m = new THREE.Mesh(puGeo, new THREE.MeshStandardMaterial({ emissiveIntensity: 5 }));
-                m.visible = false; scene.add(m); POOL.powers.push(new PowerUp(m));
-            }
-            initSettingsUI(); animate();
-        }
-
-        function update() {
-            ship.update(); if (!STATE.active) return;
-            STATE.frame++; CONFIG.difficulty = 1 + (STATE.score / 50000);
-
-            // Power-up HUD
-            ['surge', 'vector'].forEach(p => {
-                const el = document.getElementById(`pu-${p}`);
-                if(STATE.powers[p] > 0) {
-                    STATE.powers[p]--;
-                    el.style.display = 'block';
-                    document.getElementById(`bar-${p}`).style.transform = `scaleX(${STATE.powers[p] / 600})`;
-                } else { el.style.display = 'none'; }
-            });
-
-            if (STATE.frame % Math.floor(30 / CONFIG.difficulty) === 0) {
-                const e = POOL.enemies.find(i => !i.active);
-                if (e) e.spawn((Math.random()-0.5)*110, 60, Math.random() > 0.5 ? 0 : 1);
-            }
-
-            POOL.bullets.forEach(b => {
-                if (!b.active) return;
-                b.x += b.vx; b.y += b.vy; b.mesh.position.set(b.x, b.y, 0);
-                if (Math.abs(b.y) > 70) { b.active = false; b.mesh.visible = false; }
-                if (b.owner === 'player') {
-                    const hit = POOL.enemies.find(e => e.active && Math.abs(e.x - b.x) < 3.5 && Math.abs(e.y - b.y) < 3.5);
-                    if (hit) {
-                        hit.hp -= b.type === hit.type ? 10 : 30; b.active = false; b.mesh.visible = false;
-                        if (hit.hp <= 0) { 
-                            STATE.score += 200; hit.despawn(); updateUI(); 
-                            if(Math.random() < 0.15) spawnPower(hit.x, hit.y);
-                            playSfx(150, 0.4, 'square', 0.1); 
-                        }
-                    }
-                } else {
-                    if (Math.abs(b.x - STATE.shipPos.x) < 2.5 && Math.abs(b.y - STATE.shipPos.y) < 2.5) {
-                        b.active = false; b.mesh.visible = false;
-                        if (b.type === STATE.polarity) { STATE.hp = Math.min(100, STATE.hp + 1); STATE.score += 50; }
-                        else { STATE.hp -= 20; if (STATE.hp <= 0) gameOver(); }
-                        updateUI();
-                    }
-                }
-            });
-
-            POOL.enemies.forEach(e => { if (e.active) e.update(); if (e.active && Math.random() < 0.02) spawnBullet(e.x, e.y, 0, -0.9, 'enemy', e.type); });
-            POOL.powers.forEach(p => { if (p.active) p.update(); });
-            stars.position.z += 2.5 * CONFIG.difficulty; if (stars.position.z > 500) stars.position.z = 0;
-            if (STATE.mouse.click) ship.shoot();
-        }
-
-        function spawnPower(x, y) {
-            const types = ['surge', 'vector', 'aegis'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            const pu = POOL.powers.find(p => !p.active);
-            if(pu) pu.spawn(x, y, type);
-        }
-
-        function updateUI() {
-            document.getElementById('score').innerText = Math.floor(STATE.score).toString().padStart(8, '0');
-            document.getElementById('hull').innerText = `${STATE.hp}%`;
-            document.getElementById('hull').style.color = STATE.hp < 30 ? 'var(--matter)' : '#fff';
-        }
-
-        function gameOver() {
-            STATE.active = false;
-            saveRecord(STATE.score); 
-            document.getElementById('terminal-title').innerHTML = "SIGNAL<br>PERDU";
-            setTimeout(() => { 
-                document.getElementById('ui-layer').style.display = 'none';
-                document.getElementById('main-menu').style.display = 'flex';
-                document.getElementById('main-menu').style.opacity = 1;
-            }, 1000);
-        }
-
-        function saveRecord(s) {
-            const date = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-            STATE.records.push({ score: Math.floor(s), date });
-            STATE.records.sort((a,b) => b.score - a.score);
-            STATE.records = STATE.records.slice(0, 5);
-            localStorage.setItem('void_singularity_records', JSON.stringify(STATE.records));
-        }
-
-        function initSettingsUI() {
-            document.getElementById('volume-slider').addEventListener('input', (e) => { CONFIG.settings.volume = e.target.value; localStorage.setItem('void_breaker_settings', JSON.stringify(CONFIG.settings)); });
-            document.getElementById('sens-slider').addEventListener('input', (e) => { CONFIG.settings.sensitivity = e.target.value; localStorage.setItem('void_breaker_settings', JSON.stringify(CONFIG.settings)); });
-        }
-
-        window.addEventListener('mousemove', e => { STATE.mouse.x = (e.clientX/window.innerWidth)*2-1; STATE.mouse.y = -(e.clientY/window.innerHeight)*2+1; });
-        window.addEventListener('mousedown', e => { if(e.button===0) STATE.mouse.click=true; if(e.button===2) switchPol(); });
-        window.addEventListener('mouseup', () => STATE.mouse.click=false);
-        window.addEventListener('keydown', e => { if(e.code==='Space') switchPol(); });
-        window.addEventListener('contextmenu', e => e.preventDefault());
-
-        function switchPol() {
-            if(!STATE.active) return; STATE.polarity = 1 - STATE.polarity;
-            const isV = STATE.polarity === 0; const c = isV ? 'var(--void)' : 'var(--matter)';
-            document.getElementById('core-status').style.background = c;
-            document.getElementById('core-status').style.boxShadow = `0 0 30px ${c}`;
-            document.getElementById('core-label').innerText = `SYSTÈME: ${isV?'VOID':'MATTER'}`;
-            document.getElementById('core-label').style.color = c;
-            playSfx(250, 0.2, 'triangle', 0.2);
-        }
-
-        document.getElementById('start-btn').addEventListener('click', () => {
-            STATE.active = true; STATE.hp = 100; STATE.score = 0; STATE.powers = { surge:0, vector:0 };
-            document.getElementById('main-menu').style.opacity = 0;
-            setTimeout(() => { document.getElementById('main-menu').style.display='none'; document.getElementById('ui-layer').style.display='flex'; }, 500);
-            updateUI();
+        // --- INPUTS ---
+        const mouse = new THREE.Vector2();
+        window.addEventListener('mousemove', e => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            const c = document.getElementById('cursor');
+            c.style.left = e.clientX + 'px'; c.style.top = e.clientY + 'px';
         });
 
-        document.getElementById('settings-btn').addEventListener('click', () => document.getElementById('settings-overlay').style.display='flex');
-        document.querySelectorAll('.close-overlay').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.full-overlay').forEach(o=>o.style.display='none')));
+        window.addEventListener('mousedown', e => {
+            if(e.button === 0) GAME.fire();
+            if(e.button === 2) GAME.updatePolarity();
+        });
+        window.addEventListener('contextmenu', e => e.preventDefault());
+        window.addEventListener('keydown', e => {
+            if(e.code === 'Space') GAME.updatePolarity();
+            if(e.code === 'Escape') GAME.togglePause();
+        });
 
-        function animate() { requestAnimationFrame(animate); update(); composer.render(); }
-        init();
+        // --- MAIN LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Shaders Uniforms
+            glitchPass.uniforms['seed'].value = Math.random();
+            if(STATE.glitch > 0) {
+                STATE.glitch *= 0.9;
+                glitchPass.uniforms['amount'].value = STATE.glitch;
+            } else {
+                glitchPass.uniforms['amount'].value = 0;
+            }
+
+            // Camera Shake
+            if(STATE.shake > 0) {
+                camera.position.x = (Math.random()-0.5) * STATE.shake;
+                camera.position.y = -10 + (Math.random()-0.5) * STATE.shake;
+                STATE.shake *= 0.9;
+            } else {
+                // Smooth Reset
+                camera.position.x += (0 - camera.position.x) * 0.1;
+                camera.position.y += (-10 - camera.position.y) * 0.1;
+            }
+
+            if(STATE.active && !STATE.paused) {
+                STATE.frame++;
+
+                // Movement Logic
+                const targetX = mouse.x * LIMITS.x;
+                const targetY = (mouse.y * 15) - 15;
+                ship.position.x += (targetX - ship.position.x) * 0.12;
+                ship.position.y += (targetY - ship.position.y) * 0.12;
+                ship.rotation.z = (targetX - ship.position.x) * -0.06; // Bank
+                ship.rotation.x = -Math.PI/2 + (targetY - ship.position.y) * 0.05;
+
+                // Spawning
+                if(STATE.frame % 50 === 0) spawnEnemy();
+
+                // Bullets Logic
+                for(let i=bullets.length-1; i>=0; i--) {
+                    const b = bullets[i];
+                    b.position.y += 3;
+                    
+                    // Hit Test
+                    let hit = false;
+                    for(let j=enemies.length-1; j>=0; j--) {
+                        const e = enemies[j];
+                        if(b.position.distanceTo(e.position) < 4) {
+                            hit = true;
+                            // Remove bullet
+                            scene.remove(b); bullets.splice(i, 1);
+                            
+                            // Create Impact
+                            createExplosion(b.position, b.userData.type===0 ? COLORS.void : COLORS.matter, 0.5);
+
+                            const dmg = (b.userData.type === e.userData.type) ? 30 : 10;
+                            e.userData.hp -= dmg;
+                            
+                            if(e.userData.hp <= 0) {
+                                // Destroy Enemy
+                                createExplosion(e.position, COLORS.gold, 2);
+                                scene.remove(e); enemies.splice(j, 1);
+                                STATE.score += 500;
+                                STATE.shake += 0.5;
+                                document.getElementById('score').innerText = STATE.score.toString().padStart(6, '0');
+                            }
+                            break;
+                        }
+                    }
+                    if(!hit && b.position.y > 60) { scene.remove(b); bullets.splice(i, 1); }
+                }
+
+                // Enemy Logic
+                for(let i=enemies.length-1; i>=0; i--) {
+                    const e = enemies[i];
+                    e.position.y -= 0.35;
+                    e.rotation.y += 0.03;
+                    e.children[1].rotation.x += 0.05; 
+                    e.children[2].rotation.z -= 0.05;
+
+                    // Shoot
+                    if(Math.random() < 0.02) {
+                        const eb = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: e.userData.type===0 ? COLORS.void : COLORS.matter }));
+                        eb.position.copy(e.position);
+                        eb.userData = { type: e.userData.type };
+                        scene.add(eb);
+                        enemyBullets.push(eb);
+                    }
+
+                    if(e.position.y < -50) { scene.remove(e); enemies.splice(i, 1); }
+                }
+
+                // Enemy Bullets Logic
+                for(let i=enemyBullets.length-1; i>=0; i--) {
+                    const eb = enemyBullets[i];
+                    eb.position.y -= 0.9;
+                    
+                    if(eb.position.distanceTo(ship.position) < 2.5) {
+                        scene.remove(eb); enemyBullets.splice(i, 1);
+                        
+                        if(eb.userData.type === STATE.polarity) {
+                            // Absorb
+                            STATE.score += 100;
+                            STATE.hp = Math.min(100, STATE.hp + 5);
+                            createExplosion(ship.position, COLORS.gold, 0.3);
+                        } else {
+                            // Damage
+                            STATE.hp -= 20;
+                            STATE.shake += 1.5;
+                            STATE.glitch += 1.0;
+                            createExplosion(ship.position, COLORS.matter, 1);
+                            
+                            // Visual Damage Overlay
+                            const overlay = document.getElementById('damage-fx');
+                            overlay.style.boxShadow = `inset 0 0 100px 50px ${COLORS.matter}`;
+                            setTimeout(() => overlay.style.boxShadow = 'none', 200);
+                        }
+
+                        // HUD Update
+                        const hpEl = document.getElementById('hp');
+                        hpEl.innerText = Math.max(0, Math.floor(STATE.hp)) + "%";
+                        document.getElementById('score').innerText = STATE.score.toString().padStart(6, '0');
+
+                        if(STATE.hp <= 0) GAME.gameOver();
+                    } else if(eb.position.y < -50) {
+                        scene.remove(eb); enemyBullets.splice(i, 1);
+                    }
+                }
+
+                // Particles Logic
+                for(let i=particles.length-1; i>=0; i--) {
+                    const p = particles[i];
+                    p.life -= 0.05;
+                    p.mesh.position.add(p.vel);
+                    p.mesh.scale.multiplyScalar(0.9);
+                    if(p.life <= 0) { scene.remove(p.mesh); particles.splice(i, 1); }
+                }
+
+                // Warp Grid Animation
+                gridHelper.position.z += 1.0;
+                if(gridHelper.position.z > 0) gridHelper.position.z = -50;
+            } else {
+                // Idle Animation
+                ship.position.y = -20 + Math.sin(Date.now()*0.002)*2;
+                ship.rotation.z = Math.cos(Date.now()*0.001)*0.1;
+                gridHelper.position.z += 0.2;
+                if(gridHelper.position.z > 0) gridHelper.position.z = -50;
+            }
+
+            // Starfield
+            const pos = stars.geometry.attributes.position.array;
+            for(let i=2; i<pos.length; i+=3) {
+                pos[i] += 2.0;
+                if(pos[i] > 400) pos[i] = -400;
+            }
+            stars.geometry.attributes.position.needsUpdate = true;
+
+            composer.render();
+        }
+
+        animate();
+
     </script>
 </body>
 </html>
