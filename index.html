@@ -15,9 +15,11 @@
             --matter: #ff0055; /* Magenta Plasma */
             --gold: #ffcc00;   /* Or Solaire */
             --dark: #020205;   /* Noir Profond */
-            --ui-glass: rgba(10, 20, 40, 0.6);
+            --ui-glass: rgba(10, 20, 40, 0.85);
             --ui-border: rgba(255, 255, 255, 0.1);
             --scanline: rgba(0, 0, 0, 0.5);
+            --xbox-green: #107C10;
+            --xbox-blue: #00509d;
         }
 
         body {
@@ -126,6 +128,46 @@
         .cyber-btn:hover { border-color: var(--void); text-shadow: 0 0 10px var(--void); background: rgba(0, 243, 255, 0.05); }
         .cyber-btn:hover::before { left: 100%; }
 
+        /* --- CONTROLS MODAL --- */
+        #controls-modal {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        #controls-modal.active { opacity: 1; pointer-events: auto; }
+        
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+            max-width: 800px; width: 100%;
+        }
+        .control-column {
+            background: var(--ui-glass); border: 1px solid var(--ui-border);
+            padding: 30px; transform: skewX(-5deg);
+        }
+        .control-header {
+            font-family: 'Orbitron'; font-size: 24px; color: var(--void);
+            margin-bottom: 30px; text-align: center; border-bottom: 1px solid var(--ui-border); padding-bottom: 10px;
+        }
+        .key-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; font-family: 'Share Tech Mono';
+        }
+        .key-icon {
+            background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.3); font-weight: bold;
+        }
+        
+        /* Xbox Specific Icons */
+        .xbox-btn {
+            width: 24px; height: 24px; border-radius: 50%; display: inline-flex;
+            justify-content: center; align-items: center; font-weight: 800; font-size: 14px;
+            color: white; margin-left: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .btn-a { background: #107C10; border: 1px solid #20c920; }
+        .btn-x { background: #00509d; border: 1px solid #4ea3ff; }
+        .btn-menu { border-radius: 4px; width: auto; padding: 0 8px; background: #333; font-size: 10px; }
+
         @keyframes glitch-anim {
             0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
             20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
@@ -199,6 +241,58 @@
         </div>
     </div>
 
+    <!-- CONTROLS GUIDE (NEW) -->
+    <div id="controls-modal" onclick="GAME.closeControls()">
+        <div class="controls-grid" onclick="event.stopPropagation()">
+            <!-- Keyboard -->
+            <div class="control-column">
+                <div class="control-header">TERMINAL (CLAVIER/SOURIS)</div>
+                <div class="key-row">
+                    <span>MOUVEMENT</span>
+                    <span class="key-icon">SOURIS</span>
+                </div>
+                <div class="key-row">
+                    <span>TIR PLASMA</span>
+                    <span class="key-icon">CLIC GAUCHE</span>
+                </div>
+                <div class="key-row">
+                    <span>CHANGER POLARITÉ</span>
+                    <div><span class="key-icon">CLIC DROIT</span> ou <span class="key-icon">ESPACE</span></div>
+                </div>
+                <div class="key-row">
+                    <span>PAUSE</span>
+                    <span class="key-icon">ECHAP</span>
+                </div>
+            </div>
+
+            <!-- Xbox Controller -->
+            <div class="control-column" style="border-color: var(--void);">
+                <div class="control-header" style="color: #107C10;">PILOTE (XBOX / GAMEPAD)</div>
+                <div class="key-row">
+                    <span>MOUVEMENT</span>
+                    <span class="key-icon">STICK GAUCHE</span>
+                </div>
+                <div class="key-row">
+                    <span>TIR PLASMA</span>
+                    <div><span class="xbox-btn btn-a">A</span> ou <span class="key-icon">RT</span></div>
+                </div>
+                <div class="key-row">
+                    <span>CHANGER POLARITÉ</span>
+                    <div><span class="xbox-btn btn-x">X</span> ou <span class="key-icon">LB</span>/<span class="key-icon">RB</span></div>
+                </div>
+                <div class="key-row">
+                    <span>PAUSE</span>
+                    <span class="xbox-btn btn-menu">MENU ☰</span>
+                </div>
+                <div style="text-align: center; color: var(--gold); font-size: 12px; margin-top: 20px;">
+                    *AUTO-FIRE ACTIVÉ SUR MANETTE*
+                </div>
+            </div>
+            
+            <button class="cyber-btn" onclick="GAME.closeControls()" style="grid-column: span 2; margin-top: 20px; text-align: center;">RETOUR AU COMBAT</button>
+        </div>
+    </div>
+
     <!-- MAIN MENU -->
     <div id="main-menu" class="menu-layer active">
         <div class="title-container">
@@ -208,7 +302,7 @@
         </div>
         <div class="btn-group">
             <button class="cyber-btn" onclick="GAME.start()">ENGAGER SYSTÈME</button>
-            <button class="cyber-btn" onclick="alert('Contrôles: SOURIS pour bouger/tirer. CLIC DROIT ou ESPACE pour changer de couleur.')">DONNÉES TACTIQUES</button>
+            <button class="cyber-btn" onclick="GAME.showControls()">DONNÉES TACTIQUES</button>
         </div>
     </div>
 
@@ -217,6 +311,7 @@
         <div class="glitch-title" style="font-size: 80px;">PAUSE</div>
         <div class="btn-group">
             <button class="cyber-btn" onclick="GAME.togglePause()">REPRENDRE</button>
+            <button class="cyber-btn" onclick="GAME.showControls()">COMMANDES</button>
             <button class="cyber-btn" onclick="GAME.quit()">ABANDONNER</button>
         </div>
     </div>
@@ -299,7 +394,8 @@
             active: false, paused: false, gameOver: false,
             score: 0, hp: 100, polarity: 0, // 0 = Void, 1 = Matter
             frame: 0, 
-            shake: 0, glitch: 0
+            shake: 0, glitch: 0,
+            lastFireTime: 0
         };
 
         // --- THREE.JS SETUP ---
@@ -455,6 +551,29 @@
             setTimeout(() => el.classList.remove('show'), 1500);
         }
 
+        // --- GAMEPAD STATE & LOGIC ---
+        const GAMEPAD_STATE = {
+            index: null,
+            buttons: {}, // debounce tracking
+            deadzone: 0.15,
+            active: false
+        };
+
+        window.addEventListener("gamepadconnected", (e) => {
+            GAMEPAD_STATE.index = e.gamepad.index;
+            GAMEPAD_STATE.active = true;
+            notify("CONTROLLER CONNECTED", COLORS.gold);
+            
+            // Hide cursor when gamepad connects
+            document.body.style.cursor = 'none';
+        });
+
+        window.addEventListener("gamepaddisconnected", () => {
+            GAMEPAD_STATE.index = null;
+            GAMEPAD_STATE.active = false;
+            notify("CONTROLLER LOST", "red");
+        });
+
         // --- GLOBAL GAME CONTROLLER ---
         window.GAME = {
             start() {
@@ -469,10 +588,14 @@
 
                 ship.position.set(0, -20, 0);
                 
+                // Reset Mouse/Input position
+                mouse.x = 0; mouse.y = 0;
+
                 // UI
                 document.getElementById('main-menu').classList.remove('active');
                 document.getElementById('game-over').classList.remove('active');
                 document.getElementById('hud').classList.remove('hidden');
+                this.closeControls();
                 
                 this.updatePolarity(0); // Force Void
                 notify("MISSION START", "white");
@@ -491,6 +614,14 @@
                 document.getElementById('pause-menu').classList.remove('active');
                 document.getElementById('game-over').classList.remove('active');
                 document.getElementById('main-menu').classList.add('active');
+            },
+
+            showControls() {
+                document.getElementById('controls-modal').classList.add('active');
+            },
+
+            closeControls() {
+                document.getElementById('controls-modal').classList.remove('active');
             },
 
             gameOver() {
@@ -541,12 +672,16 @@
         };
 
         // --- INPUTS ---
-        const mouse = new THREE.Vector2();
+        const mouse = new THREE.Vector2(0,0.5); // Default to center-ish
+        
         window.addEventListener('mousemove', e => {
+            // Only update from mouse if we moved it significantly (avoids conflict with stick drift)
+            GAMEPAD_STATE.active = false;
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
             const c = document.getElementById('cursor');
             c.style.left = e.clientX + 'px'; c.style.top = e.clientY + 'px';
+            c.style.opacity = 1;
         });
 
         window.addEventListener('mousedown', e => {
@@ -559,9 +694,73 @@
             if(e.code === 'Escape') GAME.togglePause();
         });
 
+        // --- GAMEPAD POLLING LOOP ---
+        function updateGamepadInput() {
+            if (GAMEPAD_STATE.index === null) return;
+            const gp = navigator.getGamepads()[GAMEPAD_STATE.index];
+            if (!gp) return;
+
+            // 1. Movement (Stick Gauche: Axes 0 & 1)
+            let axisX = gp.axes[0];
+            let axisY = gp.axes[1];
+
+            // Apply Deadzone
+            if (Math.abs(axisX) < GAMEPAD_STATE.deadzone) axisX = 0;
+            if (Math.abs(axisY) < GAMEPAD_STATE.deadzone) axisY = 0;
+
+            if (Math.abs(axisX) > 0 || Math.abs(axisY) > 0) {
+                GAMEPAD_STATE.active = true;
+                document.getElementById('cursor').style.opacity = 0; // Hide mouse cursor
+                
+                // Relative Movement (Arcade Feel)
+                const speed = 0.04;
+                mouse.x += axisX * speed;
+                mouse.y -= axisY * speed; // Invert Y for Flight controls feel
+                
+                // Clamp to screen
+                mouse.x = Math.max(-1, Math.min(1, mouse.x));
+                mouse.y = Math.max(-1, Math.min(1, mouse.y));
+            }
+
+            // 2. Buttons Handling helper
+            const isPressed = (idx) => gp.buttons[idx] && gp.buttons[idx].pressed;
+            const justPressed = (idx, key) => {
+                const pressed = isPressed(idx);
+                const prev = GAMEPAD_STATE.buttons[key] || false;
+                GAMEPAD_STATE.buttons[key] = pressed;
+                return pressed && !prev;
+            };
+
+            // Fire: A (0) or Right Trigger (7)
+            // Note: Auto-fire implemented with cooldown
+            if (isPressed(0) || isPressed(7)) {
+                const now = Date.now();
+                if (now - STATE.lastFireTime > 150) { // 150ms cooldown
+                    GAME.fire();
+                    STATE.lastFireTime = now;
+                }
+            } else {
+                // Reset fire cooldown quicker if button released
+                if (Date.now() - STATE.lastFireTime > 200) STATE.lastFireTime = 0;
+            }
+
+            // Polarity: X (2) or LB (4) or RB (5)
+            if (justPressed(2, 'x') || justPressed(4, 'lb') || justPressed(5, 'rb')) {
+                GAME.updatePolarity();
+            }
+
+            // Pause: Start/Menu (9)
+            if (justPressed(9, 'start')) {
+                GAME.togglePause();
+            }
+        }
+
+
         // --- MAIN LOOP ---
         function animate() {
             requestAnimationFrame(animate);
+
+            updateGamepadInput();
 
             // Shaders Uniforms
             glitchPass.uniforms['seed'].value = Math.random();
@@ -586,12 +785,16 @@
             if(STATE.active && !STATE.paused) {
                 STATE.frame++;
 
-                // Movement Logic
+                // Movement Logic (Hybrid Mouse/Gamepad via virtual coordinates)
                 const targetX = mouse.x * LIMITS.x;
                 const targetY = (mouse.y * 15) - 15;
+                
+                // Add slight lag for weight
                 ship.position.x += (targetX - ship.position.x) * 0.12;
                 ship.position.y += (targetY - ship.position.y) * 0.12;
-                ship.rotation.z = (targetX - ship.position.x) * -0.06; // Bank
+                
+                // Banking effect
+                ship.rotation.z = (targetX - ship.position.x) * -0.06; 
                 ship.rotation.x = -Math.PI/2 + (targetY - ship.position.y) * 0.05;
 
                 // Spawning
